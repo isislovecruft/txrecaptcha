@@ -15,8 +15,19 @@
 """
 
 import base64
+import ipaddr
+import logging
 
-from ipaddr import IPv4Address
+try:
+    import mako.exceptions
+    from mako.template import Template
+    from mako.lookup import TemplateLookup
+except ImportError:
+    logging.warn(
+        ("Could not import Mako template system: https://pypi.python.org/pypi/Mako/ "
+         "You will need to override the render_GET() and render_POST methods "
+         "for txrecaptcha.resources.CaptchaProtectedResource to use your own "
+         "templating system."))
 
 from twisted.web import resource
 from twisted.web import server
@@ -24,6 +35,46 @@ from twisted.web.util import redirectTo
 
 from txrecaptcha import captcha
 from txrecaptcha import recaptcha
+
+
+TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
+logging.debug("Set template root to %s" % TEMPLATE_DIR)
+
+# Setting `filesystem_checks` to False is recommended for production servers,
+# due to potential speed increases. This means that the atimes of the Mako
+# template files aren't rechecked every time the template is requested
+# (otherwise, if they are checked, and the atime is newer, the template is
+# recompiled). `collection_size` sets the number of compiled templates which
+# are cached before the least recently used ones are removed. See:
+# http://docs.makotemplates.org/en/latest/usage.html#using-templatelookup
+lookup = TemplateLookup(directories=[TEMPLATE_DIR],
+                        output_encoding='utf-8',
+                        filesystem_checks=False,
+                        collection_size=500)
+
+
+def replaceErrorPage(error, template_name=None):
+    """Create a general error page for displaying in place of tracebacks.
+
+    Log the error to BridgeDB's logger, and then display a very plain "Sorry!
+    Something went wrong!" page to the client.
+
+    :type error: :exc:`Exception`
+    :param error: Any exeption which has occurred while attempting to retrieve
+                  a template, render a page, or retrieve a resource.
+    :param str template_name: A string describing which template/page/resource
+                              was being used when the exception occurred,
+                              i.e. ``'index.html'``.
+    :returns: A string containing HTML to serve to the client (rather than
+              serving a traceback).
+    """
+    logging.error("Error while attempting to render %s: %s"
+                  % (template_name or 'template',
+                     mako.exceptions.text_error_template().render()))
+    errmsg = _("Sorry! Something went wrong with your request.")
+    rendered = "<html><head></head><body><p>{0}</p></body></html>".format(errmsg)
+
+    return rendered
 
 
 class CaptchaProtectedResource(resource.Resource):
@@ -48,10 +99,12 @@ class CaptchaProtectedResource(resource.Resource):
         """
         ip = None
         if self.useForwardedHeader:
-            h = request.getHeader("X-Forwarded-For")
-            if h:
-                ip = h.split(",")[-1].strip()
-                if not isIPAddress(ip):
+            header = request.getHeader("X-Forwarded-For")
+            if header:
+                ip = header.split(",")[-1].strip()
+                try:
+                    ipaddr.IPAddress(ip)
+                except ValueError:
                     logging.warn("Got weird X-Forwarded-For value %r" % h)
                     ip = None
         else:
@@ -112,14 +165,10 @@ class CaptchaProtectedResource(resource.Resource):
         image, challenge = self.getCaptchaImage(request)
 
         try:
-            langs = translations.getLocaleFromHTTPRequest(request)
-            rtl = translations.usingRTLLang(langs)
             # TODO: this does not work for versions of IE < 8.0
             imgstr = 'data:image/jpeg;base64,%s' % base64.b64encode(image)
             template = lookup.get_template('captcha.html')
             rendered = template.render(strings,
-                                       rtl=rtl,
-                                       lang=langs[0],
                                        imgstr=imgstr,
                                        challenge_field=challenge)
         except Exception as err:
@@ -245,7 +294,7 @@ class ReCaptchaProtectedResource(CaptchaProtectedResource):
             remoteIP = self.remoteIP
         else:
             # generate a random IP for the captcha submission
-            remoteIP = IPv4Address(random.randint(0, 2**32-1)).compressed
+            remoteIP = ipaddr.IPv4Address(random.randint(0, 2**32-1)).compressed
 
         return remoteIP
 
@@ -297,8 +346,8 @@ class ReCaptchaProtectedResource(CaptchaProtectedResource):
                              % (clientIP, solution.error_code))
                 return (False, request)
 
-        d = txrecaptcha.submit(challenge, response, self.secretKey,
-                               remoteIP).addCallback(checkResponse, request)
+        d = recaptcha.submit(challenge, response, self.secretKey,
+                             remoteIP).addCallback(checkResponse, request)
         return d
 
     def render_GET(self, request):

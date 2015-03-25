@@ -44,7 +44,7 @@ from twisted.web.iweb import IBodyProducer
 
 from zope.interface import implements
 
-from bridgedb.crypto import SSLVerifyingContextFactory
+from txrecaptcha.crypto import SSLVerifyingContextFactory
 
 #: This was taken from  recaptcha.client.captcha.API_SSL_SERVER.
 API_SSL_SERVER = API_SERVER = "https://www.google.com/recaptcha/api"

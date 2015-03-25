@@ -146,7 +146,8 @@ class ReCaptchaProtectedResourceTests(unittest.TestCase):
             """Check the ``Request`` returned from ``_renderDeferred``."""
             self.assertIsInstance(request, DummyRequest)
             html = b''.join(request.written)
-            self.assertSubstring('Uh oh, spaghettios!', html)
+            self.assertSubstring('Sorry! Something went wrong with your request.',
+                                 html)
 
         d = task.deferLater(reactor, 0, lambda x: x, (True, self.request))
         d.addCallback(self.captchaResource._renderDeferred)

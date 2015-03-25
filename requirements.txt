@@ -1,4 +1,5 @@
 https://ipaddr-py.googlecode.com/files/ipaddr-2.1.10.tar.gz#sha1=c608450b077b19773d4f1b5f1ef88b26f6650ce0#egg=ipaddr-2.1.10-py2.7
+BeautifulSoup==3.2.1
 pyOpenSSL>=0.12
 Twisted>=13.2.0
 service_identity==14.0.0

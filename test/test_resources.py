@@ -22,6 +22,8 @@ from BeautifulSoup import BeautifulSoup
 
 from twisted.internet import reactor
 from twisted.internet import task
+from twisted.internet.error import AlreadyCalled
+from twisted.internet.error import AlreadyCancelled
 from twisted.trial import unittest
 from twisted.web.resource import Resource
 
@@ -34,20 +36,25 @@ logging.disable(50)
 #resources.logging.getLogger().setLevel(10)
 
 
+class MockWebResouce(Resource):
+    def __init__(self, *args, **kwargs):
+        Resource.__init__(self, *args, **kwargs)
+
+
 class ReCaptchaProtectedResourceTests(unittest.TestCase):
-    """Tests for :mod:`bridgedb.HTTPServer.ReCaptchaProtectedResource`."""
+    """Tests for :mod:`txrecaptcha.resources.ReCaptchaProtectedResource`."""
 
     def setUp(self):
-        """Create a :class:`HTTPServer.WebResourceBridges` and protect it with
-        a :class:`ReCaptchaProtectedResource`.
+        """Create a :class:`MockWebResource` and protect it with a
+        :class:`ReCaptchaProtectedResource`.
         """
         self.timeout = 10.0  # Can't take longer than that, right?
         # Set up our resources to fake a minimal HTTP(S) server:
         self.pagename = b'captcha.html'
         self.root = Resource()
         # (None, None) is the (distributor, scheduleInterval):
-        self.protectedResource = HTTPServer.WebResourceBridges(None, None)
-        self.captchaResource = HTTPServer.ReCaptchaProtectedResource(
+        self.protectedResource = MockWebResource()
+        self.captchaResource = resources.ReCaptchaProtectedResource(
             publicKey='23',
             secretKey='42',
             remoteIP='111.111.111.111',

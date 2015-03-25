@@ -155,8 +155,8 @@ class ReCaptchaProtectedResourceTests(unittest.TestCase):
         return d
 
     def test_checkSolution_blankFields(self):
-        """:meth:`HTTPServer.ReCaptchaProtectedResource.checkSolution` should
-        return a redirect if is the solution field is blank.
+        """:meth:`txrecaptcha.resources.ReCaptchaProtectedResource.checkSolution`
+        should return a redirect if is the solution field is blank.
         """
         self.request.method = b'POST'
         self.request.addArg('captcha_challenge_field', '')
@@ -185,15 +185,15 @@ class ReCaptchaProtectedResourceTests(unittest.TestCase):
         """render_GET() with a missing template should raise an error and
         return the result of replaceErrorPage().
         """
-        oldLookup = HTTPServer.lookup
+        oldLookup = resources.lookup
         try:
-            HTTPServer.lookup = None
+            resources.lookup = None
             self.request.method = b'GET'
             page = self.captchaResource.render_GET(self.request)
-            errorPage = HTTPServer.replaceErrorPage(Exception('kablam'))
+            errorPage = resources.replaceErrorPage(Exception('kablam'))
             self.assertEqual(page, errorPage)
         finally:
-            HTTPServer.lookup = oldLookup
+            resources.lookup = oldLookup
 
     def test_render_POST_blankFields(self):
         """render_POST() with a blank 'captcha_response_field' should return
@@ -204,7 +204,7 @@ class ReCaptchaProtectedResourceTests(unittest.TestCase):
         self.request.addArg('captcha_response_field', '')
 
         page = self.captchaResource.render_POST(self.request)
-        self.assertEqual(page, HTTPServer.server.NOT_DONE_YET)
+        self.assertEqual(page, resources.server.NOT_DONE_YET)
 
     def test_render_POST_wrongSolution(self):
         """render_POST() with a wrong 'captcha_response_field' should return
@@ -218,4 +218,4 @@ class ReCaptchaProtectedResourceTests(unittest.TestCase):
         self.request.addArg('captcha_response_field', expectedResponse)
 
         page = self.captchaResource.render_POST(self.request)
-        self.assertEqual(page, HTTPServer.server.NOT_DONE_YET)
+        self.assertEqual(page, resources.server.NOT_DONE_YET)

@@ -1,1 +1,2 @@
 pyOpenSSL>=0.12
+Twisted>=13.2.0

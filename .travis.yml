@@ -54,7 +54,7 @@ before_install:
 install:
   - sudo apt-get install -qq --no-install-suggests --no-install-recommends build-essential openssl python-dev python-setuptools
   - pip install -q --no-use-wheel Twisted==$TWISTED_VERSION pyOpenSSL==$PYOPENSSL_VERSION
-  - pip install -q --no-use-wheel service_identity==14.0.0 Mako>=0.8.1 coverage==3.7.1 coveralls
+  - pip install -q --no-use-wheel BeautifulSoup==3.2.1 https://ipaddr-py.googlecode.com/files/ipaddr-2.1.10.tar.gz#sha1=c608450b077b19773d4f1b5f1ef88b26f6650ce0#egg=ipaddr-2.1.10-py2.7 service_identity==14.0.0 Mako>=0.8.1 coverage==3.7.1 coveralls
   - make install
 
 script:

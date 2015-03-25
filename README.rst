@@ -4,7 +4,7 @@ txrecaptcha |Latest Version| |Build Status| |Coverage Status|
 
 txrecaptcha is a Twisted-based reCAPTCHA client.
 
-Unlike the official Google Python recaptcha-client_, which is harcoded_ to use
+Unlike the official Google Python recaptcha-client_, which is hardcoded_ to use
 plaintext HTTP, txrecaptcha *always* uses TLS with strict hostname checking
 (for Twisted<=13.2.0) or certificate pinning (for Twisted>=14.0.0).
 

@@ -26,6 +26,7 @@ from twisted.internet.error import AlreadyCalled
 from twisted.internet.error import AlreadyCancelled
 from twisted.trial import unittest
 from twisted.web.resource import Resource
+from twisted.web.test import requesthelper
 
 from txrecaptcha import resources
 
@@ -39,6 +40,26 @@ logging.disable(50)
 class MockWebResource(Resource):
     def __init__(self, *args, **kwargs):
         Resource.__init__(self, *args, **kwargs)
+
+
+class DummyRequest(requesthelper.DummyRequest):
+    """Wrapper for :api:`twisted.test.requesthelper.DummyRequest` to add
+    redirect support.
+    """
+
+    def __init__(self, *args, **kwargs):
+        requesthelper.DummyRequest.__init__(self, *args, **kwargs)
+        self.redirect = self._redirect(self)
+
+    def URLPath(self):
+        """Fake the missing Request.URLPath too."""
+        return self.uri
+
+    def _redirect(self, request):
+        """Stub method to add a redirect() method to DummyResponse."""
+        newRequest = type(request)
+        newRequest.uri = request.uri
+        return newRequest
 
 
 class ReCaptchaProtectedResourceTests(unittest.TestCase):

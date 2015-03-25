@@ -17,6 +17,7 @@
 import base64
 import ipaddr
 import logging
+import os
 
 try:
     import mako.exceptions

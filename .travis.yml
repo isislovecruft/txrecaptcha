@@ -1,0 +1,64 @@
+language: python
+
+notifications:
+  irc:
+    channels:
+      - "irc.oftc.net#tor-bots"
+    template:
+      - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}"
+      - "Build details : %{build_url}"
+    on_success: always
+    on_failure: always
+  email:
+    recipients:
+      - isis@torproject.org
+    on_success: never
+    on_failure: change
+
+python:
+  - "2.7"
+
+env:
+  global:
+    # Fixes Travis-CI issue #1748, which was can cause non-deterministic CI
+    # test failures. See:
+    #     https://github.com/travis-ci/travis-ci/issues/1748
+    #     https://travis-ci.org/isislovecruft/bridgedb/jobs/50169439#L1763
+    #     https://stackoverflow.com/questions/2192323/what-is-the-python-egg-cache-python-egg-cache
+    #     https://github.com/pypa/virtualenv/issues/459
+    - PYTHON_EGG_CACHE="${HOME}/.python-eggs-$(echo $RANDOM$PPID$RANDOM | sha256sum | cut -d ' ' -f 1)"
+  matrix:
+    # Debian Wheezy
+    - TWISTED_VERSION=13.2.0 PYOPENSSL_VERSION=0.13.1
+    # Debian Jessie
+    - TWISTED_VERSION=14.0.2 PYOPENSSL_VERSION=0.14
+
+matrix:
+  include:
+    - python: "2.7"
+      env: TWISTED_VERSION=15.0.0 PYOPENSSL_VERSION=0.14
+    - python: "pypy"
+      env: TWISTED_VERSION=14.0.2 PYOPENSSL_VERSION=0.14
+  allow_failures:
+    - python: "2.7"
+      env: TWISTED_VERSION=15.0.0 PYOPENSSL_VERSION=0.14
+    - python: "pypy"
+      env: TWISTED_VERSION=14.0.2 PYOPENSSL_VERSION=0.14
+  fast_finish: true
+
+before_install:
+  - sudo apt-get update
+  - mkdir $PYTHON_EGG_CACHE
+  - chmod -R og-w $PYTHON_EGG_CACHE
+
+install:
+  - sudo apt-get install -qq --no-install-suggests --no-install-recommends build-essential openssl python-dev python-setuptools
+  - pip install -q --no-use-wheel Twisted==$TWISTED_VERSION pyOpenSSL==$PYOPENSSL_VERSION
+  - pip install -q --no-use-wheel service_identity==14.0.0 Mako>=0.8.1 coverage==3.7.1 coveralls
+  - make install
+
+script:
+  - make coverage-test
+
+after_success:
+  - coveralls --rcfile=".coveragerc"

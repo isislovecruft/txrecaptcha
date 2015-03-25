@@ -1,0 +1,78 @@
+## -*- coding: utf-8 -*-
+
+<%namespace name="base" file="base.html" inheritable="True"/>
+<%page args="strings, rtl=False, lang='en', **kwargs"/>
+
+<!DOCTYPE html>
+<html lang="${lang}">
+<head>
+<meta charset="utf-8">
+<title>txrecaptcha</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="A txrecaptcha for our dear human to solve...">
+<meta name="author" content="The Tor Project">
+
+<!-- Le styles -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<!--[if IE 7]>
+  <link rel="stylesheet" href="/assets/css/font-awesome-ie7.min.css">
+<![endif]-->
+
+% if rtl:
+<style>
+span,p,h3,h4 {
+    text-align: right;
+    direction: rtl;
+}
+span {
+    float: right;
+}
+</style>
+% endif
+
+</head>
+<body style="background-repeat: no-repeat;
+             background-attachment: scroll;
+             background-position: 2% 100px;
+             background-size: 23%;">
+  <div class="container-narrow">
+    <div class="masthead">
+      <div class="nav nav-tabs">
+        <div class="nav navbar-header">
+          <a  class="navbar-brand" href="../"></a>
+        </div>
+        <ul class="nav navbar-nav pull-right">
+          <li>
+            <a href="https://www.torproject.org">The Tor Project</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+
+${next.body(strings, rtl=rtl, lang=lang, **kwargs)}
+
+
+<hr>
+
+<div class="footer">
+  <p>
+    <a href="https://github.com/isislovecruft/txrecaptcha/issues/new">
+      <i class="icon icon-large icon-bug">&nbsp;Report a Bug</i></a>
+    &nbsp; &middot; &nbsp;
+    <a href="https://github.com/isislovecruft/txrecaptcha">
+      <i class="icon icon-large icon-code">&nbsp;Source Code</i></a>
+    &nbsp; &middot; &nbsp;
+    <a href="https://github.com/isislovecruft/txrecaptcha/tree/CHANGELOG">
+      <i class="icon icon-large icon-rocket">&nbsp;Changelog</i></a>
+    &nbsp; &middot; &nbsp;
+    <a href="mailto:blackhole@torproject.org">
+      <i class="icon icon-large icon-envelope">&nbsp;Contact</i></a>
+  </p>
+  <br />
+  <p>&copy; The Tor Project</p>
+</div>
+
+</div> <!-- /container -->
+</body>
+</html>

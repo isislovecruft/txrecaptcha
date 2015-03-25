@@ -13,6 +13,7 @@
 
 """txrecaptcha general cryptographic utilities."""
 
+import logging
 import re
 import urllib
 

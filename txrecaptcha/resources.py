@@ -72,7 +72,7 @@ def replaceErrorPage(error, template_name=None):
     logging.error("Error while attempting to render %s: %s"
                   % (template_name or 'template',
                      mako.exceptions.text_error_template().render()))
-    errmsg = _("Sorry! Something went wrong with your request.")
+    errmsg = "Sorry! Something went wrong with your request."
     rendered = "<html><head></head><body><p>{0}</p></body></html>".format(errmsg)
 
     return rendered

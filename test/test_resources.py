@@ -36,7 +36,7 @@ logging.disable(50)
 #resources.logging.getLogger().setLevel(10)
 
 
-class MockWebResouce(Resource):
+class MockWebResource(Resource):
     def __init__(self, *args, **kwargs):
         Resource.__init__(self, *args, **kwargs)
 

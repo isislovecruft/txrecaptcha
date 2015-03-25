@@ -39,8 +39,23 @@ logging.disable(50)
 
 
 class MockWebResource(Resource):
-    def __init__(self, *args, **kwargs):
-        Resource.__init__(self, *args, **kwargs)
+    """A web resource for protecting."""
+
+    def render_GET(self, request):
+        """Handles requests for the mock resource.
+
+        :type request: :api:`twisted.web.server.Request`
+        :param request: An incoming request.
+        """
+        try:
+            template = resources.lookup.get_template('index.html')
+            rendered = template.render(strings,
+                                       rtl=rtl,
+                                       lang=langs[0])
+        except Exception as err:
+            rendered = resources.replaceErrorPage(err)
+
+        return rendered
 
 
 class DummyRequest(requesthelper.DummyRequest):

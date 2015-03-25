@@ -105,7 +105,7 @@ class CaptchaProtectedResource(resource.Resource):
                 try:
                     ipaddr.IPAddress(ip)
                 except ValueError:
-                    logging.warn("Got weird X-Forwarded-For value %r" % h)
+                    logging.warn("Got weird X-Forwarded-For value %r" % header)
                     ip = None
         else:
             ip = request.getClientIP()

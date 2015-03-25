@@ -173,6 +173,7 @@ setuptools.setup(
     install_requires=requires,
     dependency_links=deplinks,
     package_data={'txrecaptcha': get_data_files(filesonly=True)}
+    keywords="captcha, recaptcha, google, zope, twisted, template, mako"
     platforms="Linux, BSD, OSX, Windows",
     classifiers=[
         "Development Status :: 4 - Beta",

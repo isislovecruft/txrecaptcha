@@ -173,4 +173,26 @@ setuptools.setup(
     install_requires=requires,
     dependency_links=deplinks,
     package_data={'txrecaptcha': get_data_files(filesonly=True)}
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Framework :: Twisted",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: BSD License",
+        "Operating System :: Android",
+        "Operating System :: MacOS :: MacOS X",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX :: BSD",
+        "Operating System :: POSIX :: Linux",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Programming Language :: Python :: Implementation :: PyPy",
+        "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+        "Topic :: Internet :: WWW/HTTP :: Dynamic Content :: CGI Tools/Libraries",
+        "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+        "Topic :: Internet :: WWW/HTTP :: Site Management",
+        "Topic :: Security :: Cryptography",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Software Development :: User Interfaces",]
 )

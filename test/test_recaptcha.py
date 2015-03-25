@@ -30,7 +30,7 @@ from twisted.web.iweb import IBodyProducer
 
 from zope.interface.verify import verifyObject
 
-import txrecaptcha
+from txrecaptcha import recaptcha
 
 
 logging.disable(50)
@@ -76,12 +76,12 @@ class MockResponse(object):
 
 
 class RecaptchaResponseProtocolTests(unittest.TestCase):
-    """Tests for bridgedb.txrecaptcha.RecaptchaResponseProtocol."""
+    """Tests for txrecaptcha.recaptcha.RecaptchaResponseProtocol."""
 
     def setUp(self):
         """Setup the tests."""
         self.finished = defer.Deferred()
-        self.proto = txrecaptcha.RecaptchaResponseProtocol(self.finished)
+        self.proto = recaptcha.RecaptchaResponseProtocol(self.finished)
 
     def _test(self, responseBody, connCloseError):
         """Deliver the **responseBody** to
@@ -104,7 +104,7 @@ class RecaptchaResponseProtocolTests(unittest.TestCase):
         """
         responseBody = "true\nsome-reason-or-another\n"
         response = self._test(responseBody, ConnectionDone)
-        self.assertIsInstance(response, txrecaptcha.RecaptchaResponse)
+        self.assertIsInstance(response, recaptcha.RecaptchaResponse)
         self.assertTrue(response.is_valid)
         self.assertEqual(response.error_code, "some-reason-or-another")
 
@@ -114,7 +114,7 @@ class RecaptchaResponseProtocolTests(unittest.TestCase):
         """
         responseBody = "false\nsome-reason-or-another\n"
         response = self._test(responseBody, ResponseDone)
-        self.assertIsInstance(response, txrecaptcha.RecaptchaResponse)
+        self.assertIsInstance(response, recaptcha.RecaptchaResponse)
         self.assertIs(response.is_valid, False)
         self.assertEqual(response.error_code, "some-reason-or-another")
 
@@ -124,7 +124,7 @@ class RecaptchaResponseProtocolTests(unittest.TestCase):
         """
         responseBody = "true\nsome-reason-or-another\n"
         response = self._test(responseBody, ResponseDone)
-        self.assertIsInstance(response, txrecaptcha.RecaptchaResponse)
+        self.assertIsInstance(response, recaptcha.RecaptchaResponse)
         self.assertTrue(response.is_valid)
         self.assertEqual(response.error_code, "some-reason-or-another")
 
@@ -140,12 +140,12 @@ class RecaptchaResponseProtocolTests(unittest.TestCase):
 
 
 class BodyProducerTests(unittest.TestCase):
-    """Test for :class:`bridgedb.txrecaptcha.BodyProducer`."""
+    """Test for :class:`txrecaptcha.recaptcha.BodyProducer`."""
 
     def setUp(self):
         """Setup the tests."""
         self.content = 'Line 1\r\nLine 2\r\n'
-        self.producer = txrecaptcha._BodyProducer(self.content)
+        self.producer = recaptcha._BodyProducer(self.content)
 
     def test_interface(self):
         """BodyProducer should correctly implement IBodyProducer interface."""
@@ -160,7 +160,7 @@ class BodyProducerTests(unittest.TestCase):
         self.assertEqual(self.producer.body, self.content)
 
     def test_startProducing(self):
-        """:func:`txrecaptcha.BodyProducer.startProducing` should deliver the
+        """:func:`recaptcha.BodyProducer.startProducing` should deliver the
         original content to an IConsumer implementation.
         """
         consumer = proto_helpers.StringTransport()
@@ -171,7 +171,7 @@ class BodyProducerTests(unittest.TestCase):
 
 
 class SubmitTests(unittest.TestCase):
-    """Tests for :func:`bridgedb.txrecaptcha.submit`."""
+    """Tests for :func:`txrecaptcha.recaptcha.submit`."""
 
     def setUp(self):
         """Setup the tests."""
@@ -193,35 +193,32 @@ class SubmitTests(unittest.TestCase):
             """Check that the response is a
             :class:`txcaptcha.RecaptchaResponse`.
             """
-            self.assertIsInstance(response, txrecaptcha.RecaptchaResponse)
+            self.assertIsInstance(response, recaptcha.RecaptchaResponse)
             self.assertIs(response.is_valid, False)
             self.assertEqual(response.error_code, 'incorrect-captcha-sol')
 
-        d = txrecaptcha.submit(self.challenge, '', self.key, self.ip)
+        d = recaptcha.submit(self.challenge, '', self.key, self.ip)
         d.addCallback(checkResponse)
         return d
 
     def test_submit_returnsDeferred(self):
-        """:func:`txrecaptcha.submit` should return a deferred."""
-        response = txrecaptcha.submit(self.challenge, self.response, self.key,
-                                      self.ip)
+        """:func:`recaptcha.submit` should return a deferred."""
+        response = recaptcha.submit(self.challenge, self.response, self.key, self.ip)
         self.assertIsInstance(response, defer.Deferred)
 
     def test_submit_resultIsRecaptchaResponse(self):
         """Regardless of success or failure, the deferred returned from
-        :func:`txrecaptcha.submit` should be a
-        :class:`txcaptcha.RecaptchaResponse`.
+        :func:`recaptcha.submit` should be a :class:`recaptcha.RecaptchaResponse`.
         """
         def checkResponse(response):
             """Check that the response is a
             :class:`txcaptcha.RecaptchaResponse`.
             """
-            self.assertIsInstance(response, txrecaptcha.RecaptchaResponse)
+            self.assertIsInstance(response, recaptcha.RecaptchaResponse)
             self.assertIsInstance(response.is_valid, bool)
             self.assertIsInstance(response.error_code, basestring)
 
-        d = txrecaptcha.submit(self.challenge, self.response, self.key,
-                               self.ip)
+        d = recaptcha.submit(self.challenge, self.response, self.key, self.ip)
         d.addCallback(checkResponse)
         return d
 
@@ -241,34 +238,34 @@ class SubmitTests(unittest.TestCase):
 
 
 class MiscTests(unittest.TestCase):
-    """Tests for miscellaneous functions in :mod:`~bridgedb.txrecaptcha`."""
+    """Tests for miscellaneous functions in :mod:`txrecaptcha.recaptcha`."""
 
     def test_cbRequest(self):
         """Send a :class:`MockResponse` and check that the resulting protocol
-        is a :class:`~bridgedb.txrecaptcha.RecaptchaResponseProtocol`.
+        is a :class:`txrecaptcha.recaptcha.RecaptchaResponseProtocol`.
         """
         response = MockResponse()
-        result = txrecaptcha._cbRequest(response)
+        result = recaptcha._cbRequest(response)
         self.assertIsInstance(result, defer.Deferred)
         self.assertIsInstance(response.protocol,
-                              txrecaptcha.RecaptchaResponseProtocol)
+                              recaptcha.RecaptchaResponseProtocol)
 
     def test_ebRequest(self):
         """Send a :api:`twisted.python.failure.Failure` and check that the
         resulting protocol is a
-        :class:`~bridgedb.txrecaptcha.RecaptchaResponseProtocol`.
+        :class:`txrecaptcha.recaptcha.RecaptchaResponseProtocol`.
         """
         msg = "Einhorn"
         fail = failure.Failure(ConnectionRefusedError(msg))
-        result = txrecaptcha._ebRequest(fail)
-        self.assertIsInstance(result, txrecaptcha.RecaptchaResponse)
+        result = recaptcha._ebRequest(fail)
+        self.assertIsInstance(result, recaptcha.RecaptchaResponse)
         self.assertRegexpMatches(result.error_code, msg)
 
     def test_encodeIfNecessary(self):
-        """:func:`txrecapcha._encodeIfNecessary` should convert unicode objects
-        into strings.
+        """:func:`txrecapcha.recaptcha._encodeIfNecessary` should convert unicode
+        objects into strings.
         """
         origString = unicode('abc')
         self.assertIsInstance(origString, unicode)
-        newString = txrecaptcha._encodeIfNecessary(origString)
+        newString = recaptcha._encodeIfNecessary(origString)
         self.assertIsInstance(newString, str)

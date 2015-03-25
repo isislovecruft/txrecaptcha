@@ -55,6 +55,7 @@ install:
   - sudo apt-get install -qq --no-install-suggests --no-install-recommends build-essential openssl python-dev python-setuptools
   - pip install -q --no-use-wheel Twisted==$TWISTED_VERSION pyOpenSSL==$PYOPENSSL_VERSION
   - pip install -q --no-use-wheel service_identity==14.0.0
+  - pip install -q --no-use-wheel Mako>=0.8.1
   - pip install -q --no-use-wheel coveralls
   - make install
 
